@@ -1,5 +1,5 @@
 <script setup>
-import { reactive } from 'vue'; // Datos que no sean objetos(ref)
+import { computed, reactive } from 'vue'; // Datos que no sean objetos(ref)
 import Alert from './Alert.vue';
 
 const alert = reactive({
@@ -9,6 +9,10 @@ const alert = reactive({
 
 const emit = defineEmits(['update:name', 'update:owner', 'update:email', 'update:release', 'update:symptoms', 'addPatient']);
 const props = defineProps({
+    id: {
+        type: [String, null],
+        required: false
+    },
     name: {
         type: String,
         required: true
@@ -53,6 +57,9 @@ const validate = () => {
 
     emit('addPatient');
 }
+
+const editing = computed(() => props.id !== null);
+
 </script>
 
 <template>
@@ -111,7 +118,7 @@ const validate = () => {
                     :value="symptoms" @input="$emit('update:symptoms', $event.target.value)"></textarea>
             </div>
 
-            <input type="submit" value="Add Patient"
+            <input type="submit" :value="[editing ? 'Save Changes' : 'Add Patient']"
                 class="bg-indigo-600 p-3 w-full text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors">
         </form>
     </div>

@@ -1,5 +1,8 @@
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, watch, onMounted } from 'vue';
+
+import { uid } from 'uid';
+
 import Header from './components/Header.vue';
 import Form from './components/Form.vue';
 import Patient from './components/Patient.vue';
@@ -7,6 +10,7 @@ import Patient from './components/Patient.vue';
 const patients = ref([]);
 
 const patient = reactive({
+  id: null,
   name: '',
   owner: '',
   email: '',
@@ -14,8 +18,35 @@ const patient = reactive({
   symptoms: ''
 });
 
+watch(patients, () => {
+  addLocalStorage();
+},
+  {
+    deep: true // To watch nested properties
+  });
+
+const addLocalStorage = () => {
+  localStorage.setItem('patients', JSON.stringify(patients.value));
+}
+
+onMounted(() => {
+  const patientsLocalStorage = JSON.parse(localStorage.getItem('patients'));
+  if (patientsLocalStorage) {
+    patients.value = patientsLocalStorage;
+  }
+});
+
 const addPatient = () => {
-  patients.value.push({ ...patient });
+
+  if (patient.id) {
+    const { id } = patient;
+    const index = patients.value.findIndex(patient => patient.id === id);
+    patients.value[index] = { ...patient };
+  } else {
+    patients.value.push({ ...patient, id: uid() });
+  }
+
+
 
   // Reset the form
   // patient.name = '';
@@ -30,8 +61,19 @@ const addPatient = () => {
     owner: '',
     email: '',
     release: '',
-    symptoms: ''
+    symptoms: '',
+    id: null
   });
+}
+
+const updatePatient = (id) => {
+  const patientToUpdate = patients.value.find(patient => patient.id === id);
+  // console.log(patientToUpdate, id);
+  Object.assign(patient, patientToUpdate);
+}
+
+const deletePatient = (id) => {
+  patients.value = patients.value.filter(patient => patient.id !== id);
 }
 
 </script>
@@ -41,7 +83,7 @@ const addPatient = () => {
     <Header />
     <div class="mt-12 md:flex">
       <Form v-model:name="patient.name" v-model:owner="patient.owner" v-model:email="patient.email"
-        v-model:release="patient.release" v-model:symptoms="patient.symptoms" @addPatient="addPatient" />
+        v-model:release="patient.release" v-model:symptoms="patient.symptoms" @addPatient="addPatient" :id="patient.id" />
 
       <div class="md:w-1/2 md:h-screen overflow-y-scroll">
         <h3 class="font-black text-3xl text-center">Manage your Patients</h3>
@@ -51,7 +93,8 @@ const addPatient = () => {
             <span class="text-indigo-600 font-bold">patient</span>
             information
           </p>
-          <Patient v-for="(patient, index) in patients" :patient="patient" />
+          <Patient v-for="(patient, index) in patients" :patient="patient" @update-patient="updatePatient"
+            @delete-patient="deletePatient" />
         </div>
 
         <p v-else class="mt-20 text-2xl text-center">No Patients</p>
@@ -60,4 +103,3 @@ const addPatient = () => {
     </div>
   </div>
 </template>
-<!-- Ver video 25 -->
