@@ -7,17 +7,33 @@ const alert = reactive({
     message: ''
 });
 
-const patient = reactive({
-    name: '',
-    owner: '',
-    email: '',
-    release: '',
-    symptoms: ''
+const emit = defineEmits(['update:name', 'update:owner', 'update:email', 'update:release', 'update:symptoms', 'addPatient']);
+const props = defineProps({
+    name: {
+        type: String,
+        required: true
+    },
+    owner: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true
+    },
+    release: {
+        type: String,
+        required: true
+    },
+    symptoms: {
+        type: String,
+        required: true
+    }
 });
 
 const validate = () => {
 
-    if (Object.values(patient).includes('')) {
+    if (Object.values(props).includes('')) {
         alert.message = 'All fields are required';
         alert.type = 'error';
         return;
@@ -25,6 +41,17 @@ const validate = () => {
 
     alert.message = 'Patient added successfully';
     alert.type = 'success';
+
+    setTimeout(() => {
+        // alert.message = '';
+        // alert.type = '';
+        Object.assign(alert, {
+            message: '',
+            type: ''
+        });
+    }, 3000);
+
+    emit('addPatient');
 }
 </script>
 
@@ -45,7 +72,7 @@ const validate = () => {
                 </label>
                 <input id="petName" type="text" placeholder="Enter pet's name"
                     class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    v-model="patient.name">
+                    :value="name" @input="$emit('update:name', $event.target.value)">
             </div>
 
             <div class="mb-5">
@@ -54,7 +81,7 @@ const validate = () => {
                 </label>
                 <input id="ownerName" type="text" placeholder="Enter owner's name"
                     class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    v-model="patient.owner">
+                    :value="owner" @input="$emit('update:owner', $event.target.value)">
             </div>
 
             <div class="mb-5">
@@ -63,7 +90,7 @@ const validate = () => {
                 </label>
                 <input id="email" type="email" placeholder="Enter email"
                     class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    v-model="patient.email">
+                    :value="email" @input="$emit('update:email', $event.target.value)">
             </div>
 
             <div class="mb-5">
@@ -72,7 +99,7 @@ const validate = () => {
                 </label>
                 <input id="releaseDate" type="date"
                     class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    v-model="patient.release">
+                    :value="release" @input="$emit('update:release', $event.target.value)">
             </div>
 
             <div class="mb-5">
@@ -81,7 +108,7 @@ const validate = () => {
                 </label>
                 <textarea id="symptoms" placeholder="Enter pet's symptoms"
                     class="border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md h-20 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    v-model="patient.symptoms"></textarea>
+                    :value="symptoms" @input="$emit('update:symptoms', $event.target.value)"></textarea>
             </div>
 
             <input type="submit" value="Add Patient"
@@ -89,5 +116,3 @@ const validate = () => {
         </form>
     </div>
 </template>
-
-<!-- ver video 17 -->
